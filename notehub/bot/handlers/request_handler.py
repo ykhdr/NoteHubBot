@@ -15,10 +15,14 @@ class RequestHandler:
         self.__setup_message_handlers()
 
     def __setup_message_handlers(self):
+
         @self.__bot.message_handler(commands=['start'])
         def handle_start_message(message: Message):
-            self.__bot.reply_to(message, message.text)
+            self.__bot.send_message(message.chat.id, "Добро пожаловать на сервер Голые сиськи!")
+            self.__auth_controller
 
         @self.__bot.message_handler(func=lambda message: True)
-        def handle_message(message : Message):
+        def handle_message(message: Message):
             self.__bot.reply_to(message, message.text)
+
+

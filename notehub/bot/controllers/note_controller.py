@@ -1,2 +1,6 @@
+from bot.repositories.note_repository import NoteRepository
+
+
 class NoteController:
-    pass
+    def __init__(self):
+        self.__note_repository = NoteRepository()
