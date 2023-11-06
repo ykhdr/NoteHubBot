@@ -8,13 +8,17 @@ class UserRepository:
 
     def add_user(self, user: User):
         session = self.__db.get_session()
+        if self.get_user(user.id) is not None:
+            return
+
         session.add(user)
         session.commit()
+        print(f'User {user.id} has been created')
         session.close()
 
-    def get_user(self, user_id):
+    def get_user(self, id):
         session = self.__db.get_session()
-        user = session.query(User).get(user_id)
+        user = session.query(User).get(id)
         session.close()
 
         return user

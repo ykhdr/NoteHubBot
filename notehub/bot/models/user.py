@@ -1,15 +1,19 @@
-from sqlalchemy import Integer, Column
+from sqlalchemy import Integer, Column, BigInteger
 from sqlalchemy.orm import relationship
 
 from bot.models import Base
 
 
 class User(Base):
-    __table__ = 'users'
+    __tablename__ = 'users'
 
-    __user_id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=False)
 
-    __notes = relationship('Note', back_populates='user')
+    # notes = relationship( Note, back_populates='user')
+    # directories = relationship(Directory, back_populates='user')
+    #
+    def __init__(self, id):
+        self.id = id
 
     def get_id(self):
-        return self.__user_id
+        return self.id

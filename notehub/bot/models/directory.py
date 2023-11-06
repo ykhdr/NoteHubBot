@@ -1,31 +1,37 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 
+from bot.models import Base
+from bot.models.user import User
 
-class Directory:
-    __table__ = 'directories'
 
-    __dir_id = Column(Integer, primary_key=True)
-    __name = Column(String)
-    __user_id = Column(Integer, ForeignKey('users.user_id'))
-    __parent_dir_id = Column(Integer, ForeignKey('directories.dir_id'))
+class Directory(Base):
+    __tablename__ = 'directories'
 
-    __user = relationship('User', back_populates='directory')
-    __parent_dir = relationship('Directory', back_populates='directory')
+    id = Column(BigInteger, primary_key=True)
+    name = Column(String, nullable=False)
+    user_id = Column(BigInteger, ForeignKey('users.id'))
+    parent_dir_id = Column(BigInteger, ForeignKey('directories.id'))
 
-    def __init__(self, name, user, parent_dir):
-        self.__name = name
-        self.__user = user
-        self.__parent_dir = parent_dir
+    user = relationship(User, foreign_keys=user_id)
+    parent_dir = relationship('Directory', foreign_keys=parent_dir_id)
+
+    # user = relationship(lambda: User, remote_side='users.id', backref='id')
+    # parent_dir = relationship(lambda: Directory, remote_side='directories.id', backref='parent_dir_id')
+
+    def __init__(self, name, user_id, parent_dir_id):
+        self.name = name
+        self.user_id = user_id
+        self.parent_dir_id = parent_dir_id
 
     def get_id(self):
-        return self.__dir_id
+        return self.dir_id
 
     def get_name(self):
-        return self.__name
+        return self.name
 
     def get_user(self):
-        return self.__user
+        return self.user_id
 
     def get_parent_dir(self):
-        return self.__parent_dir
+        return self.parent_dir_id
