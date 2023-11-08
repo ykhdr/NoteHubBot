@@ -8,12 +8,12 @@ class UserRepository:
 
     def add_user(self, user: User):
         session = self.__db.get_session()
-        if self.get_user(user.id) is not None:
+        if self.get_user(user.chat_id) is not None:
             return
 
         session.add(user)
         session.commit()
-        print(f'User {user.id} has been created')
+        print(f'User {user.chat_id} has been created')
         session.close()
 
     def get_user(self, id):

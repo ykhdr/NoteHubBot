@@ -13,29 +13,29 @@ class Note(Base):
     name = Column(String, nullable=False)
     content = Column(String, nullable=True)
     dir_id = Column(BigInteger, ForeignKey('directories.id'))
-    user_id = Column(BigInteger, ForeignKey('users.id'))
+    chat_id = Column(BigInteger, ForeignKey('users.id'))
 
-    user = relationship(lambda: User, remote_side='users.id', backref='user_id')
+    user = relationship(User, foreign_keys=chat_id)
     # user = relationship('User', back_populates='notes')
-    dir = relationship(lambda: Directory, remote_side='directories.id', backref='dir_id')
+    dir = relationship(Directory, foreign_keys=dir_id)
 
     def __init__(self, name, content, user, dir):
-        self.__name = name
-        self.__content = content
-        self.__user = user
-        self.__dir = dir
+        self.name = name
+        self.content = content
+        self.chat_id = user
+        self.dir = dir
 
     def get_id(self):
-        return self.__note_id
+        return self.id
 
     def get_name(self):
-        return self.__name
+        return self.name
 
     def get_content(self):
-        return self.__content
+        return self.content
 
     def get_user(self):
-        return self.__user
+        return self.user
 
     def get_dir(self):
-        return self.__dir
+        return self.dir

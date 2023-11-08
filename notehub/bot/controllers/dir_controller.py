@@ -15,5 +15,5 @@ class DirectoryController:
     def get_child_directories(self, user_id, parent_dir_id):
         return self.__directory_repository.get_child_directories(user_id, parent_dir_id)
 
-    def get_directory(self, dir_id):
+    def get_directory(self, dir_id) -> Directory:
         return self.__directory_repository.get_directory(dir_id)

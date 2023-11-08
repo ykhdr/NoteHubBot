@@ -10,10 +10,10 @@ class Directory(Base):
 
     id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
-    user_id = Column(BigInteger, ForeignKey('users.id'))
+    chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
     parent_dir_id = Column(BigInteger, ForeignKey('directories.id'))
 
-    user = relationship(User, foreign_keys=user_id)
+    user = relationship(User, foreign_keys=chat_id)
     parent_dir = relationship('Directory', foreign_keys=parent_dir_id)
 
     # user = relationship(lambda: User, remote_side='users.id', backref='id')
@@ -21,7 +21,7 @@ class Directory(Base):
 
     def __init__(self, name, user_id, parent_dir_id):
         self.name = name
-        self.user_id = user_id
+        self.chat_id = user_id
         self.parent_dir_id = parent_dir_id
 
     def get_id(self):
@@ -31,7 +31,7 @@ class Directory(Base):
         return self.name
 
     def get_user(self):
-        return self.user_id
+        return self.chat_id
 
     def get_parent_dir(self):
         return self.parent_dir_id

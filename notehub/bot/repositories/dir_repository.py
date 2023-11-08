@@ -10,13 +10,13 @@ class DirectoryRepository:
         session = self.__db.get_session()
 
         if session.query(Directory).filter(Directory.name == dir.name,
-                                           Directory.user_id == dir.user_id,
+                                           Directory.chat_id == dir.chat_id,
                                            Directory.parent_dir_id == dir.parent_dir_id).all():
             session.close()
             return None
 
         session.add(dir)
-        print(f'User {dir.user_id} has created a directory : {dir.name}')
+        print(f'User {dir.chat_id} has created a directory : {dir.name}')
         session.commit()
 
         session.refresh(dir)
@@ -25,7 +25,7 @@ class DirectoryRepository:
 
     def get_child_directories(self, user_id, parent_dir_id):
         session = self.__db.get_session()
-        dirs = session.query(Directory).filter(Directory.user_id == user_id,
+        dirs = session.query(Directory).filter(Directory.chat_id == user_id,
                                                Directory.parent_dir_id == parent_dir_id).all()
         session.close()
 
