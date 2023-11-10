@@ -1,4 +1,6 @@
 import psycopg2.errors
+from sqlalchemy.orm import subqueryload
+
 from bot.database.database import Database
 from bot.models.directory import Directory
 from bot.models.user import User
@@ -25,11 +27,22 @@ class CurrentUserDirectoryRepository:
         print(f'New current user directory with chat id: {current_user_directory.chat_id}')
         session.close()
 
-    def update_user_current_directory(self, user: User, directory: Directory):
-        session = self.__db.get_session().query().update()
+    def update_user_current_directory(self, chat_id, dir_id):
+        session = self.__db.get_session()
 
-        session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == user.chat_id). \
-            update({CurrentUserDirectory.dir_id: directory.id})
+        session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == chat_id). \
+            update({CurrentUserDirectory.dir_id: dir_id}, synchronize_session=False)
 
         session.commit()
         session.close()
+
+    def get_current_directory(self, chat_id):
+        session = self.__db.get_session()
+
+        cur_user_dir = session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == chat_id).options(
+            subqueryload(CurrentUserDirectory.dir).subqueryload(Directory.parent_dir)
+    ).one()
+        session.refresh(cur_user_dir)
+        session.close()
+
+        return cur_user_dir

@@ -21,8 +21,24 @@ class DirectoryController:
     def get_directory(self, dir_id) -> Directory:
         return self.__directory_repository.get_directory(dir_id)
 
-    def add_user_current_directory(self, chat_id, dir_id):
+    def delete_directory(self, dir: Directory):
+        return self.__directory_repository.remove_directory(dir)
+
+    def create_user_current_directory(self, chat_id, dir_id):
         cur_user_dir = CurrentUserDirectory(chat_id, dir_id)
 
         # TODO возможно добавить возвращаемое значение
         self.__current_user_directory_repository.add_current_user_directory(cur_user_dir)
+
+    def get_current_directory(self, chat_id):
+        cur_user_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
+        if cur_user_dir is None:
+            return None
+
+        return self.__directory_repository.get_directory(cur_user_dir.dir_id)
+
+    def change_current_directory(self, chat_id, cur_id):
+        self.__current_user_directory_repository.update_user_current_directory(chat_id, cur_id)
+
+    def get_root_directory(self, chat_id):
+        return self.__directory_repository.get_root_directory(chat_id)

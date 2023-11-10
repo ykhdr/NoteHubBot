@@ -3,6 +3,7 @@ import sys
 import psycopg2.errors
 import sqlalchemy
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
 from bot.models.directory import Directory
@@ -39,7 +40,25 @@ class DirectoryRepository:
 
     def get_directory(self, dir_id):
         session = self.__db.get_session()
-        dir = session.query(Directory).filter(Directory.id == dir_id).one()
+        dir = session.query(Directory).filter(Directory.id == dir_id).options(
+            subqueryload(Directory.parent_dir)
+        ).one()
+
+        session.close()
+
+        return dir
+
+    def remove_directory(self, dir):
+        session = self.__db.get_session()
+        session.query(Directory).filter(Directory.id == dir.id).delete()
+        session.commit()
+        print(f'Directory {dir.id} has deleted')
+        session.close()
+
+    def get_root_directory(self, chat_id):
+        session = self.__db.get_session()
+
+        dir = session.query(Directory).filter(Directory.chat_id == chat_id, Directory.parent_dir_id == None).one()
         session.close()
 
         return dir
