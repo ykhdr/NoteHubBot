@@ -17,6 +17,11 @@ NOTES_STORAGE_TYPE = 'notes'
 # MOVES TYPES
 BACK_MOVE_TYPE = 'back'
 
+# BUTTON TEXTS TYPES
+DELETE_BUTTON_TEXT = 'Удалить'
+CREATE_DIR_BUTTON_TEXT = 'Создать директорию'
+CREATE_NOTE_BUTTON_TEXT = 'Создать записку'
+
 
 class RequestHandler:
 
@@ -33,16 +38,19 @@ class RequestHandler:
         def handle_start_message(message: Message):
             # if self.__auth_controller.get_user(message.from_user.id):
             #     return
+            chat_id = message.chat.id
 
-            self.__bot.send_message(message.chat.id, hello_message)
-            self.__auth_controller.create_user(message.chat.id)
+            self.__bot.send_message(chat_id, hello_message, reply_markup=_create_reply_keyboard())
+            self.__auth_controller.create_user(chat_id)
             dir = self.__create_directory(message, '/', None)
 
             if not dir:
                 dir = self.__dir_controller.get_directory(1)
 
+            self.__dir_controller.add_user_current_directory(chat_id, dir.id)
+
             text, keyboard = self.__collect_storage_message(message, dir.id, DIRS_STORAGE_TYPE, 0)
-            self.__bot.send_message(message.chat.id, text, reply_markup=keyboard)
+            self.__bot.send_message(chat_id, text, reply_markup=keyboard)
 
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(DIRS_STORAGE_TYPE))
         def handle_dirs_callback_query(call: CallbackQuery):
@@ -77,6 +85,9 @@ class RequestHandler:
 
         @self.__bot.message_handler(func=lambda message: True)
         def handle_message(message: Message):
+            if message.text == DELETE_BUTTON_TEXT:
+                pass
+
             self.__bot.reply_to(message, message.text)
 
     def __collect_storage_message(self, message, parent_dir_id, storage_type, page):
@@ -101,7 +112,20 @@ class RequestHandler:
         return dir
 
 
-def _create_keyboard(storage_type, parent_dir, elements, page):
+def _create_reply_keyboard():
+    keyboard = types.ReplyKeyboardMarkup()
+
+    delete_button = types.KeyboardButton(DELETE_BUTTON_TEXT)
+    create_dir_button = types.KeyboardButton(CREATE_DIR_BUTTON_TEXT)
+    create_note_button = types.KeyboardButton(CREATE_NOTE_BUTTON_TEXT)
+
+    keyboard.row(delete_button)
+    keyboard.row(create_note_button, create_dir_button)
+
+    return keyboard
+
+
+def _create_store_keyboard(storage_type, parent_dir, elements, page):
     """:param storage_type тип хранилища, для которого формируется клавиатура (dirs, notes)"""
 
     keyboard = types.InlineKeyboardMarkup()
@@ -139,11 +163,11 @@ def _create_keyboard(storage_type, parent_dir, elements, page):
 def _create_storage_message_with_keyboard(parent_dir: Directory, storage_type, elements, page):
     """:param page номер страницы хранилища"""
 
-    title = f' Директория {parent_dir.name}'
+    title = f'{parent_dir.name}'
     if not elements:
         storage_name = 'Директория пуста'
     else:
-        storage_name = f'Директории:' if storage_type == DIRS_STORAGE_TYPE else 'Записки:'
+        storage_name = f'Директорииииииииииииииииииииииииииииииииииииииииииииииии:' if storage_type == DIRS_STORAGE_TYPE else 'Записки:'
 
     start_index = page * 10
     end_index = min(start_index + 10, len(elements))
@@ -154,6 +178,6 @@ def _create_storage_message_with_keyboard(parent_dir: Directory, storage_type, e
     for i, element in enumerate(sub_elements, start=start_index + 1):
         message_text += f'{i}. {element.name}\n'
 
-    keyboard = _create_keyboard(storage_type, parent_dir, sub_elements, page)
+    keyboard = _create_store_keyboard(storage_type, parent_dir, sub_elements, page)
 
     return message_text, keyboard

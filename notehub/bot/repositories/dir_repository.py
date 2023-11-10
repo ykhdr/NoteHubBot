@@ -1,3 +1,9 @@
+import sys
+
+import psycopg2.errors
+import sqlalchemy
+from sqlalchemy.exc import IntegrityError
+
 from bot.database.database import Database
 from bot.models.directory import Directory
 
@@ -13,13 +19,13 @@ class DirectoryRepository:
                                            Directory.chat_id == dir.chat_id,
                                            Directory.parent_dir_id == dir.parent_dir_id).all():
             session.close()
+            print(f'Directory {dir.name} is already exists in current dir for user {dir.chat_id}', file=sys.stderr)
             return None
 
         session.add(dir)
-        print(f'User {dir.chat_id} has created a directory : {dir.name}')
         session.commit()
-
         session.refresh(dir)
+        print(f'User {dir.chat_id} has created a directory : {dir.name}')
         session.close()
         return dir
 
