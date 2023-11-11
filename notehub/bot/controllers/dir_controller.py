@@ -1,6 +1,6 @@
 from bot.models.directory import Directory
-from bot.models.current_user_directory import CurrentUserDirectory
-from bot.repositories.current_user_directory_repository import CurrentUserDirectoryRepository
+from bot.models.cur_user_dir import CurrentUserDirectory
+from bot.repositories.cur_user_dir_repository import CurrentUserDirectoryRepository
 from bot.repositories.dir_repository import DirectoryRepository
 from bot.repositories.user_repository import UserRepository
 
@@ -30,15 +30,19 @@ class DirectoryController:
         # TODO возможно добавить возвращаемое значение
         self.__current_user_directory_repository.add_current_user_directory(cur_user_dir)
 
-    def get_current_directory(self, chat_id):
+    def get_current_directory(self, chat_id) -> None | Directory:
         cur_user_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         if cur_user_dir is None:
             return None
 
         return self.__directory_repository.get_directory(cur_user_dir.dir_id)
 
-    def change_current_directory(self, chat_id, cur_id):
-        self.__current_user_directory_repository.update_user_current_directory(chat_id, cur_id)
+    def change_current_directory(self, chat_id, cur_dir_id):
+        self.__current_user_directory_repository.update_user_current_directory(chat_id, cur_dir_id)
 
     def get_root_directory(self, chat_id):
         return self.__directory_repository.get_root_directory(chat_id)
+
+    def is_directory_in_parent_exists(self, chat_id, dir_name):
+        cur_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
+        return self.__directory_repository.is_directory_in_parent_exists(chat_id, cur_dir.dir_id, dir_name)

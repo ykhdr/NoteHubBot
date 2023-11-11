@@ -14,13 +14,18 @@ hello_message = ('Привет! Это бот NoteHub, и он предназн�
 DIRS_STORAGE_TYPE = 'dirs'
 NOTES_STORAGE_TYPE = 'notes'
 
-# MOVES TYPES
+# NAVIGATION TYPES
 BACK_MOVE_TYPE = 'back'
+NEXT_PAGE_TYPE = 'next_page'
+PREV_PAGE_TYPE = 'prev_page'
 
 # BUTTON TEXTS TYPES
 DELETE_BUTTON_TEXT = 'Удалить'
 CREATE_DIR_BUTTON_TEXT = 'Создать директорию'
 CREATE_NOTE_BUTTON_TEXT = 'Создать записку'
+
+# OPTIONAL BUTTON TEXT
+CANCEL = 'Отмена'
 
 
 class RequestHandler:
@@ -49,7 +54,7 @@ class RequestHandler:
 
             self.__dir_controller.create_user_current_directory(chat_id, dir.id)
 
-            text, keyboard = self.__collect_storage_message(message, dir.id, DIRS_STORAGE_TYPE, 0)
+            text, keyboard = self.__collect_storage_message(chat_id, dir.id, DIRS_STORAGE_TYPE, 0)
             self.__bot.send_message(chat_id, text, reply_markup=keyboard)
 
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(DIRS_STORAGE_TYPE))
@@ -64,7 +69,7 @@ class RequestHandler:
             dir_id = int(call_data_split[1])
             self.__dir_controller.change_current_directory(chat_id, dir_id)
 
-            text, keyboard = self.__collect_storage_message(call.message, dir_id, DIRS_STORAGE_TYPE, 0)
+            text, keyboard = self.__collect_storage_message(chat_id, dir_id, DIRS_STORAGE_TYPE, 0)
             self.__bot.edit_message_text(chat_id=chat_id, message_id=call.message.message_id, text=text,
                                          reply_markup=keyboard)
 
@@ -79,7 +84,7 @@ class RequestHandler:
 
             self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
 
-            text, keyboard = self.__collect_storage_message(call.message, cur_dir.parent_dir_id, DIRS_STORAGE_TYPE, 0)
+            text, keyboard = self.__collect_storage_message(chat_id, cur_dir.parent_dir_id, DIRS_STORAGE_TYPE, 0)
             self.__bot.edit_message_text(chat_id=chat_id, message_id=call.message.message_id, text=text,
                                          reply_markup=keyboard)
 
@@ -88,31 +93,56 @@ class RequestHandler:
             chat_id = message.chat.id
 
             if message.text == DELETE_BUTTON_TEXT:
-                cur_dir = self.__dir_controller.get_current_directory(chat_id)
-                if cur_dir.name == '/':
-                    self.__bot.send_message(chat_id, 'Корневую директорию нельзя удалить')
-                else:
-                    self.__dir_controller.delete_directory(cur_dir)
-                    self.__bot.send_message(chat_id, 'Директория удалена')
+                self.__delete_directory(chat_id)
 
             elif message.text == CREATE_DIR_BUTTON_TEXT:
-                pass
+                msg = self.__bot.send_message(chat_id, 'Введите название директории:')
+                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [msg])
 
-            self.__bot.reply_to(message, message.text)
+    def __handle_dir_name(self, message: Message, prev_msgs: [Message]):
+        text = message.text
+        chat_id = message.chat.id
 
-    def __collect_storage_message(self, message, parent_dir_id, storage_type, page):
+        if text == CANCEL:
+            self.__clear_messages(chat_id, prev_msgs)
+
+        elif self.__dir_controller.is_directory_in_parent_exists(chat_id, text):
+            msg = self.__bot.send_message(chat_id, 'Директория с таким названием уже существует в текущей директории')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [*prev_msgs, msg])
+        else:
+            cur_dir = self.__dir_controller.get_current_directory(chat_id)
+            self.__dir_controller.create_directory(text, chat_id, cur_dir.id)
+            self.__bot.send_message(chat_id, 'Директория создана!')
+
+            text, keyboard = self.__collect_storage_message(chat_id, cur_dir.id, DIRS_STORAGE_TYPE, 0)
+            self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+
+    def __delete_directory(self, chat_id):
+        cur_dir: Directory = self.__dir_controller.get_current_directory(chat_id)
+        if cur_dir.parent_dir_id is None:
+            self.__bot.send_message(chat_id, 'Корневую директорию нельзя удалить')
+        else:
+            self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
+            self.__dir_controller.delete_directory(cur_dir)
+            self.__bot.send_message(chat_id, 'Директория удалена')
+
+            text, keyboard = self.__collect_storage_message(chat_id, cur_dir.parent_dir_id, DIRS_STORAGE_TYPE,
+                                                            0)
+            self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+
+    def __collect_storage_message(self, chat_id, parent_dir_id, storage_type, page):
 
         parent_dir = self.__dir_controller.get_directory(parent_dir_id)
 
         if not parent_dir:
             return "Error"
 
-        elements = self.__dir_controller.get_child_directories(message.chat.id, parent_dir_id)
+        elements = self.__dir_controller.get_child_directories(chat_id, parent_dir_id)
 
         return _create_storage_message_with_keyboard(parent_dir, storage_type, elements, page)
 
-    def __create_directory(self, message, name, parent_dir):
-        dir = self.__dir_controller.create_directory(name, message.chat.id, parent_dir)
+    def __create_directory(self, message, name, parent_dir_id):
+        dir = self.__dir_controller.create_directory(name, message.chat.id, parent_dir_id)
 
         if not dir:
             self.__bot.send_message(message.chat.id, 'Директория с таким названием уже существует ;(')
@@ -120,6 +150,10 @@ class RequestHandler:
             self.__bot.send_message(message.chat.id, 'Директория успешно создана!')
 
         return dir
+
+    def __clear_messages(self, chat_id, messages: [Message]):
+        for msg in messages:
+            self.__bot.delete_message(chat_id, msg.message_id)
 
 
 def _create_reply_keyboard():
@@ -151,9 +185,9 @@ def _create_store_keyboard(storage_type, elements):
         if i < 3:
             row1[i].callback_data += f'_{element.id}'
         elif i < 6:
-            row2[i].callback_data += f'_{element.id}'
+            row2[i-3].callback_data += f'_{element.id}'
         else:
-            row3[i].callback_data += f'_{element.id}'
+            row3[i-6].callback_data += f'_{element.id}'
 
     pages_row = [
         types.InlineKeyboardButton("<<", callback_data="prev_page"),
@@ -177,7 +211,7 @@ def _create_storage_message_with_keyboard(parent_dir: Directory, storage_type, e
     if not elements:
         storage_name = 'Директория пуста'
     else:
-        storage_name = f'Директорииииииииииииииииииииииииииииииииииииииииииииииии:' if storage_type == DIRS_STORAGE_TYPE else 'Записки:'
+        storage_name = f'----------------DIRS----------------' if storage_type == DIRS_STORAGE_TYPE else 'Записки:'
 
     start_index = page * 10
     end_index = min(start_index + 10, len(elements))

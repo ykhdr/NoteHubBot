@@ -4,7 +4,7 @@ from sqlalchemy.orm import subqueryload
 from bot.database.database import Database
 from bot.models.directory import Directory
 from bot.models.user import User
-from bot.models.current_user_directory import CurrentUserDirectory
+from bot.models.cur_user_dir import CurrentUserDirectory
 
 
 class CurrentUserDirectoryRepository:
@@ -12,7 +12,7 @@ class CurrentUserDirectoryRepository:
     def __init__(self):
         self.__db = Database()
 
-    def add_current_user_directory(self, current_user_directory: CurrentUserDirectory):
+    def add_current_user_directory(self, current_user_directory: CurrentUserDirectory) -> None:
         session = self.__db.get_session()
 
         if session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == current_user_directory.chat_id). \
@@ -27,7 +27,7 @@ class CurrentUserDirectoryRepository:
         print(f'New current user directory with chat id: {current_user_directory.chat_id}')
         session.close()
 
-    def update_user_current_directory(self, chat_id, dir_id):
+    def update_user_current_directory(self, chat_id, dir_id) -> None:
         session = self.__db.get_session()
 
         session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == chat_id). \
@@ -36,12 +36,12 @@ class CurrentUserDirectoryRepository:
         session.commit()
         session.close()
 
-    def get_current_directory(self, chat_id):
+    def get_current_directory(self, chat_id) -> CurrentUserDirectory:
         session = self.__db.get_session()
 
         cur_user_dir = session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == chat_id).options(
             subqueryload(CurrentUserDirectory.dir).subqueryload(Directory.parent_dir)
-    ).one()
+        ).one()
         session.refresh(cur_user_dir)
         session.close()
 

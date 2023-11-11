@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from bot.models import Base
 from bot.models.user import User
@@ -11,13 +11,12 @@ class Directory(Base):
     id = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
-    parent_dir_id = Column(BigInteger, ForeignKey('directories.id'))
+    parent_dir_id = Column(BigInteger, ForeignKey('directories.id', ondelete='cascade'))
 
-    user = relationship(User, foreign_keys=chat_id)
-    parent_dir = relationship('Directory', foreign_keys=parent_dir_id)
-
-    # user = relationship(lambda: User, remote_side='users.id', backref='id')
-    # parent_dir = relationship(lambda: Directory, remote_side='directories.id', backref='parent_dir_id')
+    user = relationship(User, backref=backref('directory', cascade='all,delete'))
+    parent_dir = relationship('Directory', backref=backref('directory', cascade='all,delete-orphan'),
+                              remote_side='Directory.id', cascade='all,delete-orphan', passive_deletes=True,
+                              single_parent=True)
 
     def __init__(self, name, user_id, parent_dir_id):
         self.name = name
