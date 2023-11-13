@@ -147,14 +147,18 @@ class RequestHandler:
                 text, keyboard = self.__collect_storage_message(chat_id, cur_dir.id, DIRS_STORAGE_TYPE, 0)
                 self.__bot.send_message(chat_id, text, reply_markup=keyboard)
 
+            elif message.text == CREATE_NOTE_BUTTON_TEXT:
+                msg = self.__bot.send_message(chat_id, 'Введите название записки:')
+                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_name, [msg])
+
     def __handle_dir_name(self, message: Message, prev_msgs: [Message]):
         text = message.text
         chat_id = message.chat.id
 
-        if text == CANCEL:
+        if text.lower() == CANCEL.lower():
             self.__clear_messages(chat_id, prev_msgs)
 
-        elif self.__dir_controller.is_directory_in_parent_exists(chat_id, text):
+        elif self.__dir_controller.is_directory_in_cur_parent_exists(chat_id, text):
             msg = self.__bot.send_message(chat_id, 'Директория с таким названием уже существует в текущей директории')
             self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [*prev_msgs, msg])
         else:
@@ -164,6 +168,31 @@ class RequestHandler:
 
             text, keyboard = self.__collect_storage_message(chat_id, cur_dir.id, DIRS_STORAGE_TYPE, 0)
             self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+
+    def __handle_note_name(self, message: Message, prev_msgs: [Message]):
+        text = message.text
+        chat_id = message.chat.id
+
+        if text.lower() == CANCEL.lower():
+            self.__clear_messages(chat_id, prev_msgs)
+
+        elif self.__note_controller.is_node_in_cur_directory_exists(chat_id, text):
+            msg = self.__bot.send_message(chat_id, 'Записка с таким названием уже существует в текущей директории')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_name, [*prev_msgs, msg])
+        else:
+            self.__bot.send_message(chat_id, 'Введите содержимое записки')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_content, text)
+
+    def __handle_note_content(self, message: Message, note_name):
+        content = message.text
+        chat_id = message.chat.id
+        cur_dir = self.__dir_controller.get_current_directory(chat_id)
+
+        self.__note_controller.create_note(chat_id, cur_dir.id, note_name, content)
+        self.__bot.send_message(chat_id, 'Записка создана!')
+
+        text, keyboard = self.__collect_storage_message(chat_id, cur_dir.id, NOTES_STORAGE_TYPE, 0)
+        self.__bot.send_message(chat_id, text, reply_markup=keyboard)
 
     def __delete_directory(self, chat_id):
         cur_dir: Directory = self.__dir_controller.get_current_directory(chat_id)
@@ -265,12 +294,14 @@ def _create_store_keyboard(storage_type, elements, page, is_last_page):
                                    callback_data=NEXT_PAGE_TYPE + '_' + str(NEXT_EMPTY if is_last_page else page + 1))
     ]
 
-    back_button = types.InlineKeyboardButton('Назад', callback_data=BACK_MOVE_TYPE)
     keyboard.add(*row1)
     keyboard.add(*row2)
     keyboard.add(*row3)
     keyboard.add(*pages_row)
-    keyboard.add(back_button)
+
+    if storage_type == DIRS_STORAGE_TYPE:
+        back_button = types.InlineKeyboardButton('Назад', callback_data=BACK_MOVE_TYPE)
+        keyboard.add(back_button)
 
     return keyboard
 

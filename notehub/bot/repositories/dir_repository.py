@@ -16,9 +16,7 @@ class DirectoryRepository:
     def add_directory(self, dir: Directory):
         session = self.__db.get_session()
 
-        if session.query(Directory).filter(Directory.name == dir.name,
-                                           Directory.chat_id == dir.chat_id,
-                                           Directory.parent_dir_id == dir.parent_dir_id).all():
+        if self.is_directory_in_parent_exists(dir.chat_id,dir.parent_dir_id, dir.name):
             session.close()
             print(f'Directory {dir.name} is already exists in current dir for user {dir.chat_id}', file=sys.stderr)
             return None
@@ -75,5 +73,7 @@ class DirectoryRepository:
             Directory.parent_dir_id == parent_dir_id,
             Directory.name == dir_name
         ).first()
+
+        session.close()
 
         return dir is not None

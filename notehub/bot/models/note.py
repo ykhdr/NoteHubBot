@@ -11,7 +11,7 @@ class Note(Entity, Storage):
     __tablename__ = 'notes'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False)
+    name : Column = Column(String, nullable=False)
     content = Column(String, nullable=True)
     dir_id = Column(BigInteger, ForeignKey('directories.id'))
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
@@ -19,11 +19,11 @@ class Note(Entity, Storage):
     user = relationship(User, foreign_keys=chat_id)
     dir = relationship(Directory, foreign_keys=dir_id)
 
-    def __init__(self, name, content, user, dir):
+    def __init__(self, name, content, chat_id, dir_id):
         self.name = name
         self.content = content
-        self.chat_id = user
-        self.dir = dir
+        self.chat_id = chat_id
+        self.dir_id = dir_id
 
     def get_id(self):
         return self.id

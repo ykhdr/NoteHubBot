@@ -43,6 +43,6 @@ class DirectoryController:
     def get_root_directory(self, chat_id):
         return self.__directory_repository.get_root_directory(chat_id)
 
-    def is_directory_in_parent_exists(self, chat_id, dir_name):
+    def is_directory_in_cur_parent_exists(self, chat_id, dir_name):
         cur_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         return self.__directory_repository.is_directory_in_parent_exists(chat_id, cur_dir.dir_id, dir_name)
