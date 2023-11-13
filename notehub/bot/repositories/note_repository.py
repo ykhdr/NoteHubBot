@@ -47,3 +47,12 @@ class NoteRepository:
         session.close()
 
         return note is not None
+
+    def get_note(self, note_id):
+        session = self.__db.get_session()
+
+        note = session.get(Note, note_id)
+
+        session.close()
+
+        return note

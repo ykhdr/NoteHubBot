@@ -72,7 +72,7 @@ class RequestHandler:
 
             call_data_split = call.data.split('_')
             if len(call_data_split) < 2:
-                self.__bot.send_message(chat_id, 'Директории/записки под этим номером не существует')
+                self.__bot.send_message(chat_id, 'записки под этим номером не существует')
                 return
 
             dir_id = int(call_data_split[1])
@@ -81,6 +81,20 @@ class RequestHandler:
             text, keyboard = self.__collect_storage_message(chat_id, dir_id, DIRS_STORAGE_TYPE, 0)
             self.__bot.edit_message_text(chat_id=chat_id, message_id=call.message.message_id, text=text,
                                          reply_markup=keyboard)
+
+        @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(NOTES_STORAGE_TYPE))
+        def handle_note_show_callback_handler(call: CallbackQuery):
+            chat_id = call.message.chat.id
+
+            call_data_split = call.data.split('_')
+            if len(call_data_split) < 2:
+                self.__bot.send_message(chat_id, 'записки под этим номером не существует')
+                return
+
+            note_id = int(call_data_split[1])
+            note = self.__note_controller.get_note(note_id)
+
+            self.__bot.send_message(chat_id, f'Название: {note.get_name()}\nТекст:\n{note.content}')
 
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BACK_MOVE_TYPE))
         def handle_back_callback_query(call: CallbackQuery):
@@ -129,7 +143,7 @@ class RequestHandler:
 
             elif message.text == CREATE_DIR_BUTTON_TEXT:
                 msg = self.__bot.send_message(chat_id, 'Введите название директории:')
-                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [msg])
+                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [message, msg])
 
             elif message.text == CHANGE_TO_NOTES_BUTTON_TEXT:
                 reply_keyboard = _create_reply_keyboard(NOTES_STORAGE_TYPE)
@@ -149,18 +163,18 @@ class RequestHandler:
 
             elif message.text == CREATE_NOTE_BUTTON_TEXT:
                 msg = self.__bot.send_message(chat_id, 'Введите название записки:')
-                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_name, [msg])
+                self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_name, [message, msg])
 
     def __handle_dir_name(self, message: Message, prev_msgs: [Message]):
         text = message.text
         chat_id = message.chat.id
 
         if text.lower() == CANCEL.lower():
-            self.__clear_messages(chat_id, prev_msgs)
+            self.__clear_messages(chat_id, [message, *prev_msgs])
 
         elif self.__dir_controller.is_directory_in_cur_parent_exists(chat_id, text):
             msg = self.__bot.send_message(chat_id, 'Директория с таким названием уже существует в текущей директории')
-            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [*prev_msgs, msg])
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name, [*prev_msgs, msg, message])
         else:
             cur_dir = self.__dir_controller.get_current_directory(chat_id)
             self.__dir_controller.create_directory(text, chat_id, cur_dir.id)
@@ -234,6 +248,17 @@ class RequestHandler:
             self.__bot.send_message(message.chat.id, 'Директория успешно создана!')
 
         return dir
+
+    def __create_note_reply_keyboard(self):
+        keyboard = types.ReplyKeyboardMarkup()
+
+        delete_button = types.KeyboardButton(DELETE_BUTTON_TEXT)
+        change_name_button = types.KeyboardButton(CHANGE_NAME_BUTTON_TEXT)
+        change_content_button = types.KeyboardButton(CHANGE_NOTE_CONTENT_BUTTON_TEXT)
+
+        keyboard.row(delete_button, change_name_button, change_content_button)
+
+        return keyboard
 
     def __clear_messages(self, chat_id, messages: [Message]):
         for msg in messages:

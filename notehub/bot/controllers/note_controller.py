@@ -19,3 +19,6 @@ class NoteController:
     def is_node_in_cur_directory_exists(self, chat_id, note_name):
         cur_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         return self.__note_repository.is_note_in_directory_exists(chat_id, cur_dir.dir_id, note_name)
+
+    def get_note(self, note_id):
+        return self.__note_repository.get_note(note_id)
