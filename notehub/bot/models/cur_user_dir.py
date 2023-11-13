@@ -1,12 +1,12 @@
 from sqlalchemy import Column, BigInteger, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
-from bot.models import Base
+from bot.models import Entity
 from bot.models.directory import Directory
 from bot.models.user import User
 
 
-class CurrentUserDirectory(Base):
+class CurrentUserDirectory(Entity):
     __tablename__ = 'current_user_directory'
 
     chat_id = Column(BigInteger, ForeignKey('users.chat_id', ondelete='cascade'), primary_key=True)
