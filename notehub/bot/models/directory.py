@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship, backref
 
-from bot.models import Base
+from bot.models import Entity
+from bot.models.storage import Storage
 from bot.models.user import User
 
 
-class Directory(Base):
+class Directory(Entity, Storage):
     __tablename__ = 'directories'
 
     id = Column(BigInteger, primary_key=True)
@@ -27,6 +28,7 @@ class Directory(Base):
         return self.dir_id
 
     def get_name(self):
+        """Overrides"""
         return self.name
 
     def get_user(self):

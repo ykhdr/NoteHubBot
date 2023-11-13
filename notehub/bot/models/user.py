@@ -1,10 +1,10 @@
 from sqlalchemy import Integer, Column, BigInteger
 from sqlalchemy.orm import relationship
 
-from bot.models import Base
+from bot.models import Entity
 
 
-class User(Base):
+class User(Entity):
     __tablename__ = 'users'
 
     chat_id = Column(BigInteger, primary_key=True, autoincrement=False)
