@@ -13,10 +13,10 @@ class DirectoryRepository:
     def __init__(self):
         self.__db = Database()
 
-    def add_root(self, root : Directory):
+    def add_root(self, root: Directory):
         session = self.__db.get_session()
 
-        if session.query(Directory).filter(Directory.parent_dir == None, Directory.chat_id == root.chat_id):
+        if session.query(Directory).filter(Directory.parent_dir == None, Directory.chat_id == root.chat_id).all():
             session.close()
             print(f'Root directory for user {root} is already exists', file=sys.stderr)
             return

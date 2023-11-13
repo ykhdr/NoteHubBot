@@ -45,8 +45,8 @@ class CurrentUserDirectoryRepository:
 
         cur_user_dir = session.query(CurrentUserDirectory).filter(CurrentUserDirectory.chat_id == chat_id).options(
             subqueryload(CurrentUserDirectory.dir).subqueryload(Directory.parent_dir)
-        ).one()
-        session.refresh(cur_user_dir)
+        ).first()
+        # session.refresh(cur_user_dir)
         session.close()
 
         return cur_user_dir

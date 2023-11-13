@@ -13,6 +13,7 @@ class UserRepository:
 
         session.add(user)
         session.commit()
+        session.refresh(user)
         print(f'User {user.chat_id} has been created')
         session.close()
 
