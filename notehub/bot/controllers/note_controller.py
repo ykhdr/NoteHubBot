@@ -22,3 +22,12 @@ class NoteController:
 
     def get_note(self, note_id):
         return self.__note_repository.get_note(note_id)
+
+    def delete_note(self, note_id):
+        return self.__note_repository.remove_note(note_id)
+
+    def rename_note(self, note_id, new_name):
+        return self.__note_repository.rename_note(note_id, new_name)
+
+    def update_note_content(self, note_id, new_content):
+        return self.__note_repository.update_content(note_id, new_content)

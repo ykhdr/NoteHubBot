@@ -1,3 +1,5 @@
+import sys
+
 import psycopg2.errors
 from sqlalchemy.orm import subqueryload
 
@@ -19,12 +21,12 @@ class CurrentUserDirectoryRepository:
                 all():
             session.close()
             print(f'Current directory {current_user_directory.dir_id} is already exists table for user '
-                  f'{current_user_directory.chat_id}')
+                  f'{current_user_directory.chat_id}', file=sys.stderr)
             return None
 
         session.add(current_user_directory)
         session.commit()
-        print(f'New current user directory with chat id: {current_user_directory.chat_id}')
+        print(f'User {current_user_directory.chat_id} has created cur user dir with {current_user_directory.dir_id}')
         session.close()
 
     def update_user_current_directory(self, chat_id, dir_id) -> None:
@@ -35,6 +37,8 @@ class CurrentUserDirectoryRepository:
 
         session.commit()
         session.close()
+
+        print(f'User {chat_id} updated current directory to {dir_id}')
 
     def get_current_directory(self, chat_id) -> CurrentUserDirectory:
         session = self.__db.get_session()

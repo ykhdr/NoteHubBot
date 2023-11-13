@@ -1,3 +1,5 @@
+import sys
+
 from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
@@ -19,8 +21,6 @@ class NoteRepository:
 
     def add_note(self, note: Note):
         session = self.__db.get_session()
-
-        print(f'User {note.chat_id} has created a note : {note.name}')
 
         if self.is_note_in_directory_exists(note.chat_id, note.dir_id, note.get_name()):
             session.close()
@@ -56,3 +56,32 @@ class NoteRepository:
         session.close()
 
         return note
+
+    def remove_note(self, note_id):
+        session = self.__db.get_session()
+
+        session.query(Note).filter(Note.id == note_id).delete()
+
+        session.commit()
+        session.close()
+
+        print(f'Note {note_id} has deleted')
+
+    def rename_note(self, note_id, new_name):
+        session = self.__db.get_session()
+
+        session.query(Note).filter(Note.id == note_id).update({Note.name: new_name}, synchronize_session=False)
+
+        session.commit()
+        session.close()
+        print(f'Note {note_id} has renamed to {new_name}')
+
+    def update_content(self, note_id, new_content):
+        session = self.__db.get_session()
+
+        session.query(Note).filter(Note.id == note_id).update({Note.content: new_content}, synchronize_session=False)
+
+        session.commit()
+        session.close()
+
+        print(f'Note {note_id} has changed content')

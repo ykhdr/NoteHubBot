@@ -11,6 +11,10 @@ class DirectoryController:
         self.__user_repository = UserRepository()
         self.__current_user_directory_repository = CurrentUserDirectoryRepository()
 
+    def create_root(self, chat_id):
+        root = Directory('/', chat_id, None)
+        return self.__directory_repository.add_root(root)
+
     def create_directory(self, name, chat_id, parent_dir_id):
         directory = Directory(name, chat_id, parent_dir_id)
         return self.__directory_repository.add_directory(directory)
@@ -46,3 +50,6 @@ class DirectoryController:
     def is_directory_in_cur_parent_exists(self, chat_id, dir_name):
         cur_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         return self.__directory_repository.is_directory_in_parent_exists(chat_id, cur_dir.dir_id, dir_name)
+
+    def rename_directory(self, dir_id, new_name):
+        return self.__directory_repository.rename_directory(dir_id, new_name)
