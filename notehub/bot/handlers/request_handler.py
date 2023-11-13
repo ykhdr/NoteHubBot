@@ -16,8 +16,10 @@ NOTES_STORAGE_TYPE = 'notes'
 
 # NAVIGATION TYPES
 BACK_MOVE_TYPE = 'back'
-NEXT_PAGE_TYPE = 'next_page'
-PREV_PAGE_TYPE = 'prev_page'
+NEXT_PAGE_TYPE = 'next'
+PREV_PAGE_TYPE = 'prev'
+PREV_EMPTY = -1
+NEXT_EMPTY = -2
 
 # BUTTON TEXTS TYPES
 DELETE_BUTTON_TEXT = 'Удалить'
@@ -76,6 +78,7 @@ class RequestHandler:
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BACK_MOVE_TYPE))
         def handle_back_callback_query(call: CallbackQuery):
             chat_id = call.message.chat.id
+            message_id = call.message.message_id
 
             cur_dir: Directory = self.__dir_controller.get_current_directory(chat_id)
             if cur_dir.parent_dir_id is None:
@@ -85,7 +88,29 @@ class RequestHandler:
             self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
 
             text, keyboard = self.__collect_storage_message(chat_id, cur_dir.parent_dir_id, DIRS_STORAGE_TYPE, 0)
-            self.__bot.edit_message_text(chat_id=chat_id, message_id=call.message.message_id, text=text,
+            self.__bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text,
+                                         reply_markup=keyboard)
+
+        @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(NEXT_PAGE_TYPE) or
+                                                             call.data.startswith(PREV_PAGE_TYPE))
+        def handle_page_move_callback_query(call: CallbackQuery):
+            chat_id = call.message.chat.id
+            message_id = call.message.message_id
+
+            data = call.data.split('_')
+            page = int(data[1])
+
+            if page == PREV_EMPTY:
+                self.__bot.send_message(chat_id, 'Предыдущей страницы нет')
+                return
+            elif page == NEXT_EMPTY:
+                self.__bot.send_message(chat_id, 'Следующей страницы нет')
+                return
+
+            cur_dir = self.__dir_controller.get_current_directory(chat_id)
+
+            text, keyboard = self.__collect_storage_message(chat_id, cur_dir.id, DIRS_STORAGE_TYPE, page)
+            self.__bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text,
                                          reply_markup=keyboard)
 
         @self.__bot.message_handler(func=lambda message: True)
@@ -169,7 +194,7 @@ def _create_reply_keyboard():
     return keyboard
 
 
-def _create_store_keyboard(storage_type, elements):
+def _create_store_keyboard(storage_type, elements, page, is_last_page):
     """:param storage_type тип хранилища, для которого формируется клавиатура (dirs, notes)"""
 
     keyboard = types.InlineKeyboardMarkup()
@@ -185,13 +210,15 @@ def _create_store_keyboard(storage_type, elements):
         if i < 3:
             row1[i].callback_data += f'_{element.id}'
         elif i < 6:
-            row2[i-3].callback_data += f'_{element.id}'
+            row2[i - 3].callback_data += f'_{element.id}'
         else:
-            row3[i-6].callback_data += f'_{element.id}'
+            row3[i - 6].callback_data += f'_{element.id}'
 
     pages_row = [
-        types.InlineKeyboardButton("<<", callback_data="prev_page"),
-        types.InlineKeyboardButton(">>", callback_data="next_page")
+        types.InlineKeyboardButton("<<",
+                                   callback_data=PREV_PAGE_TYPE + '_' + str(page - 1 if page != 0 else PREV_EMPTY)),
+        types.InlineKeyboardButton(">>",
+                                   callback_data=NEXT_PAGE_TYPE + '_' + str(NEXT_EMPTY if is_last_page else page + 1))
     ]
 
     back_button = types.InlineKeyboardButton('Назад', callback_data=BACK_MOVE_TYPE)
@@ -208,20 +235,21 @@ def _create_storage_message_with_keyboard(parent_dir: Directory, storage_type, e
     """:param page номер страницы хранилища"""
 
     title = f'{parent_dir.name}'
+    page_title = f'Страница {page + 1}'
     if not elements:
         storage_name = 'Директория пуста'
     else:
         storage_name = f'----------------DIRS----------------' if storage_type == DIRS_STORAGE_TYPE else 'Записки:'
 
-    start_index = page * 10
-    end_index = min(start_index + 10, len(elements))
+    start_index = page * 10 - (0 if page == 0 else 1)
+    end_index = min(start_index + 9, len(elements))
 
     sub_elements = elements[start_index:end_index]
 
-    message_text = title + '\n' + storage_name + '\n\n'
+    message_text = title + '\n' + page_title + '\n' + storage_name + '\n\n'
     for i, element in enumerate(sub_elements, start=start_index + 1):
         message_text += f'{i}. {element.name}\n'
 
-    keyboard = _create_store_keyboard(storage_type, sub_elements)
+    keyboard = _create_store_keyboard(storage_type, sub_elements, page, len(elements) == end_index)
 
     return message_text, keyboard
