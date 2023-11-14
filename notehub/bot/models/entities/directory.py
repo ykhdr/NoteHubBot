@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
+from sqlalchemy import Column, String, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship, backref
 
-from bot.models import Entity
-from bot.models.storage import Storage
-from bot.models.user import User
+from bot.models.entities.entity import Entity
+from bot.models.entities.storage import Storage
+from bot.models.entities.user import User
 
 
-class Directory(Entity, Storage):
+class Directory(Entity.getEntityClassInstance(), Storage):
     __tablename__ = 'directories'
 
     id = Column(BigInteger, primary_key=True)

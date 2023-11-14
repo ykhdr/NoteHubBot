@@ -1,13 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
+from sqlalchemy import Column, String, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 
-from bot.models import Entity
-from bot.models.directory import Directory
-from bot.models.storage import Storage
-from bot.models.user import User
+from bot.models.entities.directory import Directory
+from bot.models.entities.entity import Entity
+from bot.models.entities.storage import Storage
+from bot.models.entities.user import User
 
 
-class Note(Entity, Storage):
+class Note(Entity.getEntityClassInstance(), Storage):
     __tablename__ = 'notes'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

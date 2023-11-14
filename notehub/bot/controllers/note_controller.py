@@ -1,6 +1,5 @@
-from bot.models.note import Note
+from bot.models.entities.note import Note
 from bot.repositories.cur_user_dir_repository import CurrentUserDirectoryRepository
-from bot.repositories.dir_repository import DirectoryRepository
 from bot.repositories.note_repository import NoteRepository
 
 

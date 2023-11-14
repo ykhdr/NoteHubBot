@@ -1,12 +1,9 @@
 import sys
 
-import psycopg2.errors
-import sqlalchemy
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
-from bot.models.directory import Directory
+from bot.models.entities.directory import Directory
 
 
 class DirectoryRepository:

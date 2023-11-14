@@ -1,5 +1,7 @@
-from bot.models.directory import Directory
-from bot.models.cur_user_dir import CurrentUserDirectory
+from __future__ import annotations
+
+from bot.models.entities.cur_user_dir import CurrentUserDirectory
+from bot.models.entities.directory import Directory
 from bot.repositories.cur_user_dir_repository import CurrentUserDirectoryRepository
 from bot.repositories.dir_repository import DirectoryRepository
 from bot.repositories.user_repository import UserRepository
@@ -34,7 +36,7 @@ class DirectoryController:
         # TODO возможно добавить возвращаемое значение
         self.__current_user_directory_repository.add_current_user_directory(cur_user_dir)
 
-    def get_current_directory(self, chat_id) -> None | Directory:
+    def get_current_directory(self, chat_id):
         cur_user_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         if cur_user_dir is None:
             return None

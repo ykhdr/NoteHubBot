@@ -3,7 +3,7 @@ import sys
 from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
-from bot.models.note import Note
+from bot.models.entities.note import Note
 
 
 class NoteRepository:

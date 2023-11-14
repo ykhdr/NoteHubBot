@@ -1,12 +1,10 @@
 import sys
 
-import psycopg2.errors
 from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
-from bot.models.directory import Directory
-from bot.models.user import User
-from bot.models.cur_user_dir import CurrentUserDirectory
+from bot.models.entities.cur_user_dir import CurrentUserDirectory
+from bot.models.entities.directory import Directory
 
 
 class CurrentUserDirectoryRepository:

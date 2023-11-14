@@ -1,6 +1,4 @@
-from abc import abstractmethod, ABC
-
-from bot.models import Entity
+from abc import abstractmethod
 
 
 class Storage:

@@ -1,5 +1,5 @@
 from bot.database.database import Database
-from bot.models.user import User
+from bot.models.entities.user import User
 
 
 class UserRepository:
