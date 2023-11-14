@@ -6,7 +6,7 @@ from bot.models.entities.storage import Storage
 from bot.models.entities.user import User
 
 
-class Directory(Entity.getEntityClassInstance(), Storage):
+class Directory(Entity.get_entity_class_instance(), Storage):
     __tablename__ = 'directories'
 
     id = Column(BigInteger, primary_key=True)

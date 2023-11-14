@@ -17,9 +17,9 @@ class UserRepository:
         print(f'User {user.chat_id} has been created')
         session.close()
 
-    def get_user(self, id):
+    def get_user(self, chat_id):
         session = self.__db.get_session()
-        user = session.query(User).get(id)
+        user = session.query(User).get(chat_id)
         session.close()
 
         return user

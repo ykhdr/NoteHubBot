@@ -5,5 +5,5 @@ class Entity:
     __class_instance = declarative_base()
 
     @staticmethod
-    def getEntityClassInstance():
+    def get_entity_class_instance():
         return Entity.__class_instance

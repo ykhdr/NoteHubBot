@@ -7,7 +7,7 @@ from bot.models.entities.storage import Storage
 from bot.models.entities.user import User
 
 
-class Note(Entity.getEntityClassInstance(), Storage):
+class Note(Entity.get_entity_class_instance(), Storage):
     __tablename__ = 'notes'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

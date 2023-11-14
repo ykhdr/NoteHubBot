@@ -6,7 +6,7 @@ from bot.models.entities.entity import Entity
 from bot.models.entities.user import User
 
 
-class CurrentUserDirectory(Entity.getEntityClassInstance()):
+class CurrentUserDirectory(Entity.get_entity_class_instance()):
     __tablename__ = 'current_user_directory'
 
     chat_id = Column(BigInteger, ForeignKey('users.chat_id', ondelete='cascade'), primary_key=True)
