@@ -18,15 +18,8 @@ class ReplyHandler(Handler):
         self.__note_controller = note_controller
         self.__storage_msg_collector = storage_msg_collector
 
-        self.__reply_button_texts = [BotTypes.DELETE_DIR_BUTTON_TEXT,
-                                     BotTypes.CREATE_DIR_BUTTON_TEXT,
-                                     BotTypes.CHANGE_TO_NOTES_BUTTON_TEXT,
-                                     BotTypes.CHANGE_TO_DIRS_BUTTON_TEXT,
-                                     BotTypes.CREATE_NOTE_BUTTON_TEXT,
-                                     BotTypes.RENAME_DIR_BUTTON_TEXT]
-
     def setup_handler(self):
-        @self.__bot.message_handler(func=lambda message: message.text in self.__reply_button_texts)
+        @self.__bot.message_handler(func=lambda message: message.text in BotTypes.get_reply_commands_list())
         def handle_reply_buttons_message(message: Message):
             chat_id = message.chat.id
 
@@ -80,7 +73,15 @@ class ReplyHandler(Handler):
         text = message.text
         chat_id = message.chat.id
 
-        if self.__dir_controller.is_directory_in_cur_parent_exists(chat_id, text):
+        if text in BotTypes.get_reply_commands_list():
+            self.__bot.send_message(chat_id, 'Некорректное название для директории')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name)
+
+        elif len(text) >= 30:
+            self.__bot.send_message(chat_id, 'Слишком длинное название, используйте название короче 30 символов')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_note_name)
+
+        elif self.__dir_controller.is_directory_in_cur_parent_exists(chat_id, text):
             self.__bot.send_message(chat_id, 'Директория с таким названием уже существует в текущей директории')
             self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name)
         else:
@@ -95,6 +96,14 @@ class ReplyHandler(Handler):
     def __handle_note_name(self, message: Message):
         text = message.text
         chat_id = message.chat.id
+
+        if text in BotTypes.get_reply_commands_list():
+            self.__bot.send_message(chat_id, 'Некорректное название для заметки')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name)
+
+        elif len(text) >= 30:
+            self.__bot.send_message(chat_id, 'Слишком длинное название, используйте название короче 30 символов')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name)
 
         if self.__note_controller.is_node_in_cur_directory_exists(chat_id, text):
             self.__bot.send_message(chat_id, 'Записка с таким названием уже существует в текущей директории')

@@ -43,6 +43,8 @@ class NoteOperationsHandler(Handler):
                                                                                       BotTypes.NOTES_STORAGE_TYPE, 0)
                 self.__bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard)
 
+            self.__bot.answer_callback_query(call.id)
+
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BotTypes.NOTES_STORAGE_TYPE))
         def handle_note_show_callback_handler(call: CallbackQuery):
             chat_id = call.message.chat.id
@@ -59,17 +61,29 @@ class NoteOperationsHandler(Handler):
             self.__bot.send_message(chat_id, f'Название: {note.get_name()}\nТекст:\n{note.content}',
                                     reply_markup=keyboard)
 
+            self.__bot.answer_callback_query(call.id)
+
     def __handle_rename_note(self, message: Message, note_id):
         chat_id = message.chat.id
         new_name = message.text
 
-        self.__note_controller.rename_note(note_id, new_name)
-        self.__bot.send_message(chat_id, 'Название заметки обновлено!')
+        if len(new_name) >= 30:
+            self.__bot.send_message(chat_id, 'Слишком длинное название, используйте название короче 30 символов')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
 
-        cur_dir = self.__dir_controller.get_current_directory(chat_id)
-        text, keyboard = self.__storage_msg_collector.collect_storage_message(chat_id, cur_dir.id,
-                                                                              BotTypes.NOTES_STORAGE_TYPE, 0)
-        self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+        elif new_name in BotTypes.get_reply_commands_list():
+            self.__bot.send_message(chat_id, 'Некорректное название для записки')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
+
+        else:
+            self.__note_controller.rename_note(note_id, new_name)
+            self.__bot.send_message(chat_id, 'Название заметки обновлено!')
+
+            cur_dir = self.__dir_controller.get_current_directory(chat_id)
+
+            text, keyboard = self.__storage_msg_collector.collect_storage_message(chat_id, cur_dir.id,
+                                                                                  BotTypes.NOTES_STORAGE_TYPE, 0)
+            self.__bot.send_message(chat_id, text, reply_markup=keyboard)
 
     def __handle_content_change(self, message: Message, note_id):
         chat_id = message.chat.id

@@ -35,6 +35,8 @@ class DirectoryOperationsHandler(Handler):
             self.__bot.edit_message_text(chat_id=chat_id, message_id=call.message.message_id, text=text,
                                          reply_markup=keyboard)
 
+            self.__bot.answer_callback_query(call.id)
+
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BotTypes.BACK_MOVE_TYPE))
         def handle_back_callback_query(call: CallbackQuery):
             chat_id = call.message.chat.id
@@ -52,6 +54,8 @@ class DirectoryOperationsHandler(Handler):
                                                                                   0)
             self.__bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text,
                                          reply_markup=keyboard)
+
+            self.__bot.answer_callback_query(call.id)
 
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BotTypes.NEXT_PAGE_TYPE) or
                                                              call.data.startswith(BotTypes.PREV_PAGE_TYPE))
@@ -75,3 +79,5 @@ class DirectoryOperationsHandler(Handler):
                                                                                   BotTypes.DIRS_STORAGE_TYPE, page)
             self.__bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text,
                                          reply_markup=keyboard)
+
+            self.__bot.answer_callback_query(call.id)

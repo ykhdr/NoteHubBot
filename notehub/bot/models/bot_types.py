@@ -1,4 +1,3 @@
-
 class BotTypes:
     # STORAGE TYPES
     DIRS_STORAGE_TYPE = 'dirs'
@@ -29,3 +28,12 @@ class BotTypes:
 
     # OPTIONAL BUTTON TEXT
     CANCEL = 'Отмена'
+
+    @staticmethod
+    def get_reply_commands_list():
+        return [BotTypes.DELETE_DIR_BUTTON_TEXT,
+                BotTypes.CREATE_DIR_BUTTON_TEXT,
+                BotTypes.CHANGE_TO_NOTES_BUTTON_TEXT,
+                BotTypes.CHANGE_TO_DIRS_BUTTON_TEXT,
+                BotTypes.CREATE_NOTE_BUTTON_TEXT,
+                BotTypes.RENAME_DIR_BUTTON_TEXT]

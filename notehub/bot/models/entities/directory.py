@@ -10,7 +10,7 @@ class Directory(Entity.getEntityClassInstance(), Storage):
     __tablename__ = 'directories'
 
     id = Column(BigInteger, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String(30), nullable=False)
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
     parent_dir_id = Column(BigInteger, ForeignKey('directories.id', ondelete='cascade'))
 

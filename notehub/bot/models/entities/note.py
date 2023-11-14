@@ -11,7 +11,8 @@ class Note(Entity.getEntityClassInstance(), Storage):
     __tablename__ = 'notes'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    name : Column = Column(String, nullable=False)
+
+    name: Column = Column(String(30), nullable=False)
     content = Column(String, nullable=True)
     dir_id = Column(BigInteger, ForeignKey('directories.id'))
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
