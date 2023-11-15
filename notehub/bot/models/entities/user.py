@@ -11,7 +11,7 @@ class User(Entity.get_entity_class_instance()):
     chat_id = Column(BigInteger, primary_key=True, autoincrement=False)
     user_id = Column(BigInteger, nullable=False)
 
-    directories = relationship('Directory', back_populates='user')  # Добавляем обратное отношение
+    directories = relationship('Directory', back_populates='user',overlaps="directories")  # Добавляем обратное отношение
     notes = relationship('Note', back_populates='user')
 
 

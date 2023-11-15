@@ -15,7 +15,7 @@ class DirectoryRepository:
 
         if session.query(Directory).filter(Directory.parent_dir == None, Directory.chat_id == root.chat_id).all():
             session.close()
-            print(f'Root directory for user {root} is already exists', file=sys.stderr)
+            print(f'Root directory for user {root.id} is already exists', file=sys.stderr)
             return
 
         session.add(root)

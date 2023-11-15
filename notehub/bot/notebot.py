@@ -9,6 +9,7 @@ from bot.controllers.storage_msg_collector import StorageMessageCollector
 from bot.handlers.command_handler import CommandHandler
 from bot.handlers.dir_op_handler import DirectoryOperationsHandler
 from bot.handlers.note_op_handler import NoteOperationsHandler
+from bot.handlers.note_share_inline_handler import NoteShareInlineHandler
 from bot.handlers.reply_handler import ReplyHandler
 
 
@@ -29,6 +30,7 @@ class NoteBot:
         self.__note_op_handler = NoteOperationsHandler(self.__bot, dir_controller, note_controller,
                                                        storage_msg_collector)
         self.__reply_handler = ReplyHandler(self.__bot, note_controller, dir_controller, storage_msg_collector)
+        self.__note_share_inline_handler = NoteShareInlineHandler(self.__bot, note_controller)
 
         print('NoteBot have been inited')
 
@@ -37,6 +39,7 @@ class NoteBot:
         self.__dir_op_handler.setup_handler()
         self.__note_op_handler.setup_handler()
         self.__reply_handler.setup_handler()
+        self.__note_share_inline_handler.setup_handler()
 
         print('Handlers have been setuped')
 

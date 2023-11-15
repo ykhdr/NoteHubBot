@@ -3,7 +3,9 @@ import sys
 from sqlalchemy.orm import subqueryload
 
 from bot.database.database import Database
+from bot.models.entities.directory import Directory
 from bot.models.entities.note import Note
+from bot.models.entities.user import User
 
 
 class NoteRepository:
@@ -85,3 +87,15 @@ class NoteRepository:
         session.close()
 
         print(f'Note {note_id} has changed content')
+
+    def get_user_notes_like(self, user_id, text):
+        session = self.__db.get_session()
+
+        notes = (session.query(Note).join(User).filter(User.user_id == user_id)
+                 .filter(Note.name.startswith(text))
+                 .options(subqueryload(Note.dir).joinedload(Directory.parent_dir), subqueryload(Note.user))
+                 .all())
+
+        session.close()
+
+        return notes

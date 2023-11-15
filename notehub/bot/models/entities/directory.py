@@ -14,10 +14,10 @@ class Directory(Entity.get_entity_class_instance(), Storage):
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
     parent_dir_id = Column(BigInteger, ForeignKey('directories.id', ondelete='cascade'))
 
-    user = relationship(User, backref=backref('directory', cascade='all,delete'))
+    user = relationship(User, backref=backref('directory', cascade='all,delete'), lazy='joined')
     parent_dir = relationship('Directory', backref=backref('directory', cascade='all,delete-orphan'),
                               remote_side='Directory.id', cascade='all,delete-orphan', passive_deletes=True,
-                              single_parent=True)
+                              single_parent=True, lazy='joined', overlaps="directories")
 
     def __init__(self, name, user_id, parent_dir_id):
         self.name = name

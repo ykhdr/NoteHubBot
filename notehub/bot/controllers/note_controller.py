@@ -30,3 +30,6 @@ class NoteController:
 
     def update_note_content(self, note_id, new_content):
         return self.__note_repository.update_content(note_id, new_content)
+
+    def get_user_notes_like(self, user_id, text):
+        return self.__note_repository.get_user_notes_like(user_id, text)

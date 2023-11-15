@@ -17,8 +17,8 @@ class Note(Entity.get_entity_class_instance(), Storage):
     dir_id = Column(BigInteger, ForeignKey('directories.id'))
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
 
-    user = relationship(User, foreign_keys=chat_id)
-    dir = relationship(Directory, foreign_keys=dir_id)
+    user = relationship(User, foreign_keys=chat_id, lazy='joined')
+    dir = relationship(Directory, foreign_keys=dir_id, lazy='joined')
 
     def __init__(self, name, content, chat_id, dir_id):
         self.name = name
