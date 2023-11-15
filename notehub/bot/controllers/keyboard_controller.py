@@ -26,6 +26,18 @@ class KeyboardController:
         return keyboard
 
     @staticmethod
+    def create_note_delete_confirm_keyboard(note_id):
+        keyboard = types.InlineKeyboardMarkup()
+
+        confirm = types.InlineKeyboardButton(BotTypes.CONFIRM_DELETE,
+                                             callback_data=BotTypes.CONFIRM_DELETE + '_' + str(note_id))
+        cancel = types.InlineKeyboardButton(BotTypes.CANCEL, callback_data=BotTypes.CANCEL)
+
+        keyboard.row(cancel, confirm)
+
+        return keyboard
+
+    @staticmethod
     def create_directory_reply_keyboard(storage_type):
         keyboard = types.ReplyKeyboardMarkup()
 

@@ -27,10 +27,17 @@ class ReplyHandler(Handler):
             chat_id = message.chat.id
 
             if message.text == BotTypes.DELETE_DIR_BUTTON_TEXT:
-                self.__delete_directory(chat_id)
+                cur_dir = self.__dir_controller.get_current_directory(chat_id)
+                children = self.__dir_controller.get_child_directories(chat_id, cur_dir.id)
+                notes = self.__note_controller.get_notes_in_directory(chat_id, cur_dir.id)
+
+                if children or notes:
+                    self.__bot.send_message(chat_id, 'Директория не пуста, очистите директорию перед удалением')
+                else:
+                    self.__delete_directory(chat_id)
 
             elif message.text == BotTypes.CREATE_DIR_BUTTON_TEXT:
-                msg = self.__bot.send_message(chat_id, 'Введите название директории:')
+                self.__bot.send_message(chat_id, 'Введите название директории:')
                 self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_dir_name)
 
             elif message.text == BotTypes.CHANGE_TO_NOTES_BUTTON_TEXT:

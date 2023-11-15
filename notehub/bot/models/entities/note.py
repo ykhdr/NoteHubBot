@@ -26,18 +26,6 @@ class Note(Entity.get_entity_class_instance(), Storage):
         self.chat_id = chat_id
         self.dir_id = dir_id
 
-    def get_id(self):
-        return self.id
-
     def get_name(self):
         """Overrides"""
         return self.name
-
-    def get_content(self):
-        return self.content
-
-    def get_user(self):
-        return self.user
-
-    def get_dir(self):
-        return self.dir

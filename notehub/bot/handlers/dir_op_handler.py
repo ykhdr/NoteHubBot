@@ -24,7 +24,7 @@ class DirectoryOperationsHandler(Handler):
 
             call_data_split = call.data.split('_')
             if len(call_data_split) < 2:
-                self.__bot.send_message(chat_id, 'Директории под этим номером не существует')
+                self.__bot.answer_callback_query(call.id, 'Директории под этим номером не существует')
                 return
 
             dir_id = int(call_data_split[1])
@@ -44,7 +44,7 @@ class DirectoryOperationsHandler(Handler):
 
             cur_dir: Directory = self.__dir_controller.get_current_directory(chat_id)
             if cur_dir.parent_dir_id is None:
-                self.__bot.send_message(chat_id, 'Родительской директории не существует')
+                self.__bot.answer_callback_query(call.id, 'Родительской директории не существует')
                 return
 
             self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
@@ -67,10 +67,10 @@ class DirectoryOperationsHandler(Handler):
             page = int(data[1])
 
             if page == BotTypes.PREV_EMPTY:
-                self.__bot.send_message(chat_id, 'Предыдущей страницы нет')
+                self.__bot.answer_callback_query(call.id, 'Предыдущей страницы нет')
                 return
             elif page == BotTypes.NEXT_EMPTY:
-                self.__bot.send_message(chat_id, 'Следующей страницы нет')
+                self.__bot.answer_callback_query(call.id, 'Следующей страницы нет')
                 return
 
             cur_dir = self.__dir_controller.get_current_directory(chat_id)

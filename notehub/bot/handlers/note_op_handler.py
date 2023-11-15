@@ -35,15 +35,34 @@ class NoteOperationsHandler(Handler):
                 self.__bot.send_message(chat_id, 'Введите новое название для заметки:')
                 self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
             elif data[0] == BotTypes.DELETE_NOTE_TYPE:
+
+                keyboard = KeyboardController.create_note_delete_confirm_keyboard(note_id)
+                text = 'Вы уверены, что хотите удалить записку?'
+                self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+
+            self.__bot.answer_callback_query(call.id)
+
+        @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BotTypes.CONFIRM_DELETE) or
+                                                             call.data.startswith(BotTypes.CANCEL))
+        def handle_note_delete_confirmation(call: CallbackQuery):
+            chat_id = call.message.chat.id
+
+            data = call.data.split('_')
+
+            if data[0] == BotTypes.CONFIRM_DELETE:
+                note_id = int(data[1])
                 self.__note_controller.delete_note(note_id)
-                self.__bot.send_message(chat_id, 'Заметка удалена')
+                self.__bot.answer_callback_query(call.id, 'Заметка удалена')
+                self.__bot.delete_message(chat_id, message_id=call.message.message_id)
 
                 cur_dir = self.__dir_controller.get_current_directory(chat_id)
                 text, keyboard = self.__storage_msg_collector.collect_storage_message(chat_id, cur_dir.id,
                                                                                       BotTypes.NOTES_STORAGE_TYPE, 0)
                 self.__bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard)
 
-            self.__bot.answer_callback_query(call.id)
+            else:
+                self.__bot.delete_message(chat_id, message_id=call.message.message_id)
+                self.__bot.answer_callback_query(call.id)
 
         @self.__bot.callback_query_handler(func=lambda call: call.data.startswith(BotTypes.NOTES_STORAGE_TYPE))
         def handle_note_show_callback_handler(call: CallbackQuery):
@@ -51,7 +70,7 @@ class NoteOperationsHandler(Handler):
 
             call_data_split = call.data.split('_')
             if len(call_data_split) < 2:
-                self.__bot.send_message(chat_id, 'Заметки под этим номером не существует')
+                self.__bot.answer_callback_query(call.id, 'Заметки под этим номером не существует')
                 return
 
             note_id = int(call_data_split[1])

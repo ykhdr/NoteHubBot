@@ -26,8 +26,9 @@ class BotTypes:
     CHANGE_TO_DIRS_BUTTON_TEXT = 'Показать директории'
     CHANGE_TO_NOTES_BUTTON_TEXT = 'Показать заметки'
 
-    # OPTIONAL BUTTON TEXT
+    # NOTE DELETE CONFIRMATION
     CANCEL = 'Отмена'
+    CONFIRM_DELETE = 'Да'
 
     @staticmethod
     def get_reply_commands_list():

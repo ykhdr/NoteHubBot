@@ -24,15 +24,6 @@ class Directory(Entity.get_entity_class_instance(), Storage):
         self.chat_id = user_id
         self.parent_dir_id = parent_dir_id
 
-    def get_id(self):
-        return self.dir_id
-
     def get_name(self):
         """Overrides"""
         return self.name
-
-    def get_user(self):
-        return self.chat_id
-
-    def get_parent_dir(self):
-        return self.parent_dir_id

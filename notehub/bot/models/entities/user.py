@@ -14,10 +14,6 @@ class User(Entity.get_entity_class_instance()):
     directories = relationship('Directory', back_populates='user',overlaps="directories")  # Добавляем обратное отношение
     notes = relationship('Note', back_populates='user')
 
-
     def __init__(self, chat_id, user_id):
         self.chat_id = chat_id
         self.user_id = chat_id
-
-    def get_id(self):
-        return self.chat_id
