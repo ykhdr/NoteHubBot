@@ -31,6 +31,9 @@ class ReplyHandler(Handler):
                 children = self.__dir_controller.get_child_directories(chat_id, cur_dir.id)
                 notes = self.__note_controller.get_notes_in_directory(chat_id, cur_dir.id)
 
+                if cur_dir.parent_dir_id is None:
+                    self.__bot.send_message(chat_id, 'Корневую директорию нельзя удалить')
+
                 if children or notes:
                     self.__bot.send_message(chat_id, 'Директория не пуста, очистите директорию перед удалением')
                 else:
@@ -151,14 +154,12 @@ class ReplyHandler(Handler):
 
     def __delete_directory(self, chat_id):
         cur_dir: Directory = self.__dir_controller.get_current_directory(chat_id)
-        if cur_dir.parent_dir_id is None:
-            self.__bot.send_message(chat_id, 'Корневую директорию нельзя удалить')
-        else:
-            self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
-            self.__dir_controller.delete_directory(cur_dir)
-            self.__bot.send_message(chat_id, 'Директория удалена')
 
-            text, keyboard = self.__storage_msg_collector.collect_storage_message(chat_id, cur_dir.parent_dir_id,
-                                                                                  BotTypes.DIRS_STORAGE_TYPE,
-                                                                                  0)
-            self.__bot.send_message(chat_id, text, reply_markup=keyboard)
+        self.__dir_controller.change_current_directory(chat_id, cur_dir.parent_dir_id)
+        self.__dir_controller.delete_directory(cur_dir)
+        self.__bot.send_message(chat_id, 'Директория удалена')
+
+        text, keyboard = self.__storage_msg_collector.collect_storage_message(chat_id, cur_dir.parent_dir_id,
+                                                                              BotTypes.DIRS_STORAGE_TYPE,
+                                                                              0)
+        self.__bot.send_message(chat_id, text, reply_markup=keyboard)
