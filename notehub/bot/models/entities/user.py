@@ -16,4 +16,4 @@ class User(Entity.get_entity_class_instance()):
 
     def __init__(self, chat_id, user_id):
         self.chat_id = chat_id
-        self.user_id = chat_id
+        self.user_id = user_id

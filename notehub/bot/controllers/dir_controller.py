@@ -33,7 +33,6 @@ class DirectoryController:
     def create_user_current_directory(self, chat_id, dir_id):
         cur_user_dir = CurrentUserDirectory(chat_id, dir_id)
 
-        # TODO возможно добавить возвращаемое значение
         self.__current_user_directory_repository.add_current_user_directory(cur_user_dir)
 
     def get_current_directory(self, chat_id):

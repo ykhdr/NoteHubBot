@@ -13,7 +13,7 @@ class Note(Entity.get_entity_class_instance(), Storage):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
 
     name: Column = Column(String(30), nullable=False)
-    content = Column(String, nullable=True)
+    content = Column(String(4096), nullable=True)
     dir_id = Column(BigInteger, ForeignKey('directories.id'))
     chat_id = Column(BigInteger, ForeignKey('users.chat_id'))
 
