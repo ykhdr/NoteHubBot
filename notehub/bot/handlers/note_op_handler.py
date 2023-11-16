@@ -86,13 +86,21 @@ class NoteOperationsHandler(Handler):
         chat_id = message.chat.id
         new_name = message.text
 
-        if len(new_name) >= 30:
+        cur_dir = self.__dir_controller.get_current_directory(chat_id)
+        notes = self.__note_controller.get_notes_in_directory(chat_id, cur_dir.id)
+
+        if notes:
+            self.__bot.send_message(chat_id,'Записка с таким названием уже существует в текущей директории')
+            self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
+        elif len(new_name) >= 30:
             self.__bot.send_message(chat_id, 'Слишком длинное название, используйте название короче 30 символов')
             self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
 
         elif new_name in BotTypes.get_reply_commands_list():
             self.__bot.send_message(chat_id, 'Некорректное название для записки')
             self.__bot.register_next_step_handler_by_chat_id(chat_id, self.__handle_rename_note, note_id)
+
+
 
         else:
             self.__note_controller.rename_note(note_id, new_name)
