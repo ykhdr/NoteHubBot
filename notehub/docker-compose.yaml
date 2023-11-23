@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    restart: always
+    container_name: notehub_bot
+    depends_on:
+      - db
+    environment:
+      - TOKEN=${TOKEN}
+      - DB_URL=${DB_URL}
+    links:
+      - db
+
+  db:
+    image: mysql:latest
+    container_name: notehub_db
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
