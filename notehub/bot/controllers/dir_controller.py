@@ -35,7 +35,7 @@ class DirectoryController:
 
         self.__current_user_directory_repository.add_current_user_directory(cur_user_dir)
 
-    def get_current_directory(self, chat_id):
+    def get_current_directory(self, chat_id) -> Directory | None:
         cur_user_dir = self.__current_user_directory_repository.get_current_directory(chat_id)
         if cur_user_dir is None:
             return None
